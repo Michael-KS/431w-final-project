@@ -3,6 +3,11 @@ from db import get_connection
 from profile_queries import *
 from category_queries import *
 from interest_queries import *
+from location_queries import *
+from activity_queries import *
+from event_queries import *
+from review_queries import *
+
 
 app = Flask(__name__)
 
@@ -107,6 +112,15 @@ def delete_existing_category():
     else:
         return jsonify(result), 500
     
+@app.route("/get_categories", methods=["GET"])
+def get_categories():
+    result = get_all_categories()
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+    
 @app.route("/add_interest", methods=["POST"])
 def add_new_interest():
     data = request.get_json()
@@ -136,6 +150,208 @@ def delete_existing_interest():
         return jsonify(result), 200
     else:
         return jsonify(result), 500
+    
+@app.route("/add_interest_to_profile", methods=["POST"])
+def add_interest_to_profile_route():
+    data = request.get_json()
+    email = data.get("email")
+    interest_id = data.get("in_id")
 
+    if not all([email, interest_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = add_interest_to_profile(email, interest_id)
+    if result["status"] == "success":
+        return jsonify(result), 201
+    else:
+        return jsonify(result), 500   
+    
+@app.route("/remove_interest_from_profile", methods=["DELETE"])
+def remove_interest_from_profile_route():
+    data = request.get_json()
+    email = data.get("email")
+    interest_id = data.get("in_id")
+
+    if not all([email, interest_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = remove_interest_from_profile(email, interest_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+    
+@app.route("/get_profile_interests", methods=["GET"])
+def get_profile_interests_route():
+    email = request.args.get("email")
+
+    if not email:
+        return jsonify({"status": "error", "message": "Email is required"}), 400
+
+    interests = get_profile_interests(email)
+
+    if interests is not None:
+        return jsonify({"status": "success", "interests": interests}), 200
+    else:
+        return jsonify({"status": "error", "message": "Could not retrieve interests"}), 500
+
+@app.route("/add_location", methods=["POST"])
+def add_location_route():
+    data = request.get_json()
+    name = data.get("name")
+    address = data.get("address")
+
+    if not all([name, address]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = add_location(name, address)
+    if result["status"] == "success":
+        return jsonify(result), 201
+    else:
+        return jsonify(result), 500
+    
+@app.route("/delete_location", methods=["DELETE"])
+def delete_location_route():
+    data = request.get_json()
+    location_id = data.get("loc_id")
+
+    if not location_id:
+        return jsonify({"status": "error", "message": "Location ID is required"}), 400
+
+    result = delete_location(location_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+
+@app.route("/add_activity", methods=["POST"])
+def add_activity_route():
+    data = request.get_json()
+    loc_id = data.get("loc_id")
+    title = data.get("title")
+    duration = data.get("duration")
+    price = data.get("price")
+    cat_id = data.get("cat_id")
+
+    if not all([loc_id, title, duration, price, cat_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = add_activity(loc_id, title, duration, price, cat_id)
+    if result["status"] == "success":
+        return jsonify(result), 201
+    else:
+        return jsonify(result), 500
+    
+@app.route("/delete_activity", methods=["DELETE"])
+def delete_activity_route():
+    data = request.get_json()
+    act_id = data.get("act_id")
+
+    if not act_id:
+        return jsonify({"status": "error", "message": "Activity ID is required"}), 400
+
+    result = delete_activity(act_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+    
+@app.route("/add_event", methods=["POST"])
+def add_event_route():
+    data = request.get_json()
+    date = data.get("date")
+    status = data.get("status")
+    act_id = data.get("act_id")
+    host_email = data.get("host_email")
+
+    if not all([date, status, act_id, host_email]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = add_event(date, status, act_id, host_email)
+    if result["status"] == "success":
+        return jsonify(result), 201
+    else:
+        return jsonify(result), 500
+
+@app.route("/delete_event", methods=["DELETE"])
+def delete_event_route():
+    data = request.get_json()
+    e_id = data.get("e_id")
+
+    if not e_id:
+        return jsonify({"status": "error", "message": "Event ID is required"}), 400
+
+    result = delete_event(e_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+    
+@app.route("/add_participant", methods=["POST"])
+def add_participant_route():
+    data = request.get_json()
+    email = data.get("email")
+    e_id = data.get("e_id")
+
+    if not all([email, e_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = add_participant(email, e_id)
+    if result["status"] == "success":
+        return jsonify(result), 201
+    else:
+        return jsonify(result), 500
+    
+@app.route("/delete_participant", methods=["DELETE"])
+def delete_participant_route():
+    data = request.get_json()
+    email = data.get("email")
+    e_id = data.get("e_id")
+
+    if not all([email, e_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = delete_participant(email, e_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+
+@app.route("/add_review", methods=["POST"])
+def add_review_route():
+    data = request.get_json()
+    author_email = data.get("author_email")
+    star_level = data.get("star_level")
+    e_id = data.get("e_id")
+
+    if not all([author_email, star_level, e_id]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    result = add_review(author_email, star_level, e_id)
+    if result["status"] == "success":
+        return jsonify(result), 201
+    else:
+        return jsonify(result), 500
+    
+@app.route("/delete_review", methods=["DELETE"])
+def delete_review_route():
+    data = request.get_json()
+    rev_id = data.get("rev_id")
+
+    if not rev_id:
+        return jsonify({"status": "error", "message": "Review ID is required"}), 400
+
+    result = delete_review(rev_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+    
 if __name__ == "__main__":
     app.run(debug=True)

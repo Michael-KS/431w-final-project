@@ -35,3 +35,20 @@ def delete_category(cat_id):
     finally:
         cur.close()
         conn.close()
+
+def get_all_categories():
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT Description, Suited_for FROM Category")
+        categories = cur.fetchall()
+        category_list = [
+            {"description": row[0], "suited_for": row[1]}
+            for row in categories
+        ]
+        return {"status": "success", "categories": category_list}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        cur.close()
+        conn.close()

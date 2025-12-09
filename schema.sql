@@ -29,7 +29,7 @@ CREATE TABLE Interest (
 );
 
 
-CREATE TABLE UserInterest (
+CREATE TABLE ProfileInterest (
     Email VARCHAR(40) NOT NULL,
     In_id INTEGER NOT NULL,
     PRIMARY KEY (Email,In_id),
