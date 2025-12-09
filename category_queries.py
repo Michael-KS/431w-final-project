@@ -1,15 +1,15 @@
 from db import get_connection
 
-def add_interest(name, cat_id):
+def add_category(desc, suited_for):
     conn = get_connection()
     cur = conn.cursor()
     try:
         cur.execute(
-            "INSERT INTO Interest (Name, Cat_id) VALUES (%s, %s)",
-            (name, cat_id),
+            "INSERT INTO Category (Description, Suited_for) VALUES (%s, %s)",
+            (desc, suited_for),
         )
         conn.commit()
-        return {"status": "success", "message": "Interest added successfully."}
+        return {"status": "success", "message": "Category added successfully."}
     except Exception as e:
         conn.rollback()
         return {"status": "error", "message": str(e)}
@@ -17,18 +17,18 @@ def add_interest(name, cat_id):
         cur.close()
         conn.close()
 
-def delete_interest(interest_id):
+def delete_category(cat_id):
     conn = get_connection()
     cur = conn.cursor()
     try:
         cur.execute(
-            "DELETE FROM Interest WHERE In_id = %s",
-            (interest_id,),
+            "DELETE FROM Category WHERE Cat_id = %s",
+            (cat_id,),
         )
         if cur.rowcount == 0:
-            return {"status": "error", "message": "Interest id not found."}
+            return {"status": "error", "message": "Category id not found."}
         conn.commit()
-        return {"status": "success", "message": "Interest deleted successfully."}
+        return {"status": "success", "message": "Category deleted successfully."}
     except Exception as e:
         conn.rollback()
         return {"status": "error", "message": str(e)}
