@@ -353,5 +353,19 @@ def delete_review_route():
     else:
         return jsonify(result), 500
     
+@app.route("/get_activities_by_category", methods=["GET"])
+def get_activities_by_category_route():
+    cat_id = request.args.get("cat_id")
+
+    if not cat_id:
+        return jsonify({"status": "error", "message": "Category ID is required"}), 400
+
+    result = get_activities_by_category(cat_id)
+
+    if result["status"] == "success":
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+
 if __name__ == "__main__":
     app.run(debug=True)

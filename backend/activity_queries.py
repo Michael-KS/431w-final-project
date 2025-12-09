@@ -32,3 +32,35 @@ def delete_activity(act_id):
     finally:
         cur.close()
         conn.close()
+
+#get all activites in a specific catagory with their location details
+def get_activities_by_category(cat_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT a.Title, a.Duration, a.Price, l.Name, l.Address
+            FROM Activity a
+            JOIN Location l ON a.Loc_id = l.Loc_id
+            WHERE a.Cat_id = %s
+            """,
+            (cat_id,),
+        )
+        activities = cur.fetchall()
+        activity_list = []
+        for activity in activities:
+            activity_info = {
+                "Title": activity[0],
+                "Duration": activity[1],
+                "Price": activity[2],
+                "Name": activity[3],
+                "Address": activity[4],
+            }
+            activity_list.append(activity_info)
+        return {"status": "success", "activities": activity_list}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        cur.close()
+        conn.close()
