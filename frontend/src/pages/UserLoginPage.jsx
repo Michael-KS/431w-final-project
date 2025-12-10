@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import axios from 'axios';
 import {useNavigate} from 'react-router-dom';
+import { useAuth } from "../context/AuthContext";
 
 
 function UserLoginPage() {
@@ -10,6 +11,7 @@ function UserLoginPage() {
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const {login} = useAuth();
 
     const handleChange = (e) => {
         const {name, value } = e.target;
@@ -30,6 +32,7 @@ function UserLoginPage() {
             });
 
             console.log('Login Success:', response.data.message);
+            login(response.data.profile)
             navigate('/user-dashboard');
 
         } catch (err) {

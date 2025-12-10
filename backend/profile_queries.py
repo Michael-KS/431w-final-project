@@ -109,9 +109,6 @@ def delete_profile(email):
         conn.close()
 
 def get_profile(email):
-    """
-    Retrieves a user's profile by email.
-    """
     conn = get_connection()
     cur = conn.cursor(dictionary=True)
     try:

@@ -1,11 +1,121 @@
 import React, {useState} from "react";
+import axios from "axios";
 import './UserDashboard.css'
+import { useAuth } from "../context/AuthContext";
 
-const ProfileTabContent = () =>(
-    <div>
-        <h3>Profile Settings</h3>
-    </div>
-);
+const ProfileTabContent = () =>{
+    const {user} = useAuth();
+    const [data, setData] = useState({
+        username: '',
+        password: '',
+        location: '',
+        gender: '',
+    });
+    const [error, setError] = useState('');
+    
+
+    const handleChange = (e) => {
+        const {name, value } = e.target;
+        setData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try{
+            const response = await axios.post('http://127.0.0.1:5000/update_profile', {
+                email: user.email,
+                username: data.username,
+                password: data.password,
+                location: data.location,
+                gender: data.gender
+            });
+
+            console.log('Update Success:', response.data.message);
+
+        } catch (err) {
+            if (err.response && err.response.data){
+                setError(err.response.data.error);
+            }
+            else {
+                setError('you inputed an invalid entry');
+            }
+        } 
+    };
+        return (
+            <form onSubmit={handleSubmit}>
+            <h2>Update Your Profile?</h2>
+            {error && <p>{error}</p>}
+            <div>
+            <label htmlFor="username" style={{display: "block"}}>Username</label>
+            <input
+                type = 'text'
+                id='username'
+                name='username'
+                value = {data.username}
+                onChange = {handleChange}
+                placeholder="username"
+                />
+            <label htmlFor="password" style={{display:'block'}}>Password</label>
+            <input 
+                type='password'
+                id='password'
+                name='password'
+                value={data.password}
+                onChange={handleChange}
+                placeholder="password"
+                />
+            <label htmlFor="location" style={{display:'block'}}>Location</label>
+            <input 
+                type='text'
+                id='location'
+                name='location'
+                value={data.location}
+                onChange={handleChange}
+                placeholder="location"
+                />
+            <label htmlFor="gender" style={{display:'block'}}>Gender</label>
+            <input 
+                type='text'
+                id='gender'
+                name='gender'
+                value={data.gender}
+                onChange={handleChange}
+                placeholder="gender"
+                />
+                </div>
+                <button type='submit'>Submit</button>
+        </form>
+        );
+};
+
+const GetProfileTabContent = () => {
+    const {user} = useAuth();
+    const [showInfo, setShowInfo] = useState(false);
+
+    const handleClick = async () => {
+        try {
+        const response = await axios.get(`http://127.0.0.1:5000/api/profile`, {
+            params: {
+              email: user.email 
+            }
+          });
+          
+          if (response.data.status === 'success') {
+            setProfileData(response.data.profile); // Store the fetched profile in our state
+          }
+   
+        } catch (err) {
+          if (err.response && err.response.data) {
+            setError(err.response.data.message);
+          } else {
+            setError("An error occurred while fetching the profile.");
+          }
+    }
+};
 
 const ActivitiesTabContent = () =>(
     <div>
@@ -43,6 +153,8 @@ function UserDashboard() {
             return <ReviewTabContent/>;
         } else if(activeTab === 'top'){
             return <TopTenTabContent/>;
+        } else if(activeTab === 'getprofile'){
+            return <GetProfileTabContent/>;
         }
         return <ProfileTabContent/>;
 
@@ -56,7 +168,11 @@ function UserDashboard() {
                 <button
                 className={activeTab === 'profile' ? 'active' : ''}
                 onClick={() => setActiveTab('profile')}
-                >Profile</button>
+                >Update Profile</button>
+                <button
+                className={activeTab === 'getprofile' ? 'active' : ''}
+                onClick={() => setActiveTab('getprofile')}
+                >View Profile</button>
                 <button
                 className={activeTab === 'activities' ? 'active' : ''}
                 onClick={() => setActiveTab('activities')}

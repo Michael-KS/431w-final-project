@@ -52,23 +52,25 @@ def login_user():
 
     return '', 204
 
-@app.route("/update_profile", methods=["PUT"])
+@app.route("/update_profile", methods=["PUT", "OPTIONS"])
 def update_user_profile():
-    data = request.get_json()
-    email = data.get("email")
-    username = data.get("username")
-    password = data.get("password")
-    location = data.get("location")
-    gender = data.get("gender")
-    if not email:
-        return jsonify({"status": "error", "message": "Email is required"}), 400
-    
-    result = update_profile(email, username, password, location, gender)
+    if request.method == 'PUT':
+        data = request.get_json()
+        email = data.get("email")
+        username = data.get("username")
+        password = data.get("password")
+        location = data.get("location")
+        gender = data.get("gender")
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
+        
+        result = update_profile(email, username, password, location, gender)
 
-    if result["status"] == "success":
-        return jsonify(result), 200
-    else:
-        return jsonify(result), 500
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+    return '', 204
 
 
 
@@ -106,7 +108,7 @@ def add_new_category():
 def delete_existing_category():
     data = request.get_json()
     cat_id = data.get("cat_id")
-
+  
     if not cat_id:
         return jsonify({"status": "error", "message": "Category ID is required"}), 400
 
