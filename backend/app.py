@@ -408,5 +408,17 @@ def get_profile_route():
 
     return '', 204
 
+@app.route("/get_all_activities", methods=["GET", "OPTIONS"])
+def get_all_activities_route():
+    if request.method == 'GET':
+        result = get_all_activities()
+
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+
+    return '', 204
+
 if __name__ == "__main__":
     app.run(debug=True)

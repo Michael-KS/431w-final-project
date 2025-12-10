@@ -64,3 +64,27 @@ def get_activities_by_category(cat_id):
     finally:
         cur.close()
         conn.close()
+
+def get_all_activities():
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM Activity")
+        activities = cur.fetchall()
+        activity_list = []
+        for activity in activities:
+            activity_info = {
+                "Act_id": activity[0],
+                "Loc_id": activity[1],
+                "Title": activity[2],
+                "Duration": activity[3],
+                "Price": activity[4],
+                "Cat_id": activity[5],
+            }
+            activity_list.append(activity_info)
+        return {"status": "success", "activities": activity_list}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        cur.close()
+        conn.close()
