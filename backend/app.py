@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from db import get_connection
 from profile_queries import *
 from category_queries import *
@@ -10,7 +11,9 @@ from review_queries import *
 
 
 app = Flask(__name__)
-
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}},
+    supports_credentials=True,
+    allow_headers=['Content-Type'])
 
 @app.route("/register", methods=["POST"])
 def register_user():
@@ -30,22 +33,28 @@ def register_user():
     else:
         return jsonify(result), 500
 
-@app.route("/login", methods=["POST"]) # submitting sensitive info requires POST
+@app.route("/login", methods=["POST", "OPTIONS"]) # submitting sensitive info requires POST
 def login_user():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    print("--- LOGIN ENDPOINT HIT ---")
+    print("Request Method:", request.method)
+    print("Request Headers:\n", request.headers)
+    print("--------------------------")
+    if request.method == 'POST':
+        data = request.get_json()
+        email = data.get("email")
+        password = data.get("password")
 
-    if not all([email, password]):
-        return jsonify({"status": "error", "message": "Missing email or password"}), 400
+        if not all([email, password]):
+            return jsonify({"status": "error", "message": "Missing email or password"}), 400
 
-    profile = get_profile_for_login(email, password)
+        profile = get_profile_for_login(email, password)
 
-    if profile:
-        return jsonify({"status": "success", "profile": profile})
-    else:
-        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
+        if profile:
+            return jsonify({"status": "success", "profile": profile})
+        else:
+            return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
+    return '', 204
 
 @app.route("/update_profile", methods=["PUT"])
 def update_user_profile():

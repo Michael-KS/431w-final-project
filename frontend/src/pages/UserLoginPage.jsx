@@ -1,4 +1,6 @@
 import React, {useState} from "react";
+import axios from 'axios';
+import {useNavigate} from 'react-router-dom';
 
 
 function UserLoginPage() {
@@ -6,27 +8,48 @@ function UserLoginPage() {
         email: '',
         password: '',
     });
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const {name, value } = e.target;
-        setFormData((prevData) => ({
+        setData((prevData) => ({
             ...prevData,
             [name]: value,
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert(`Login attempt with Email: ${data.email}, Password: ${data.password}`);
-        setData({
-            email: '',
-            password: '',
-        });
+        setError('');
+        //alert(`Login attempt with Email: ${data.email}, Password: ${data.password}`);
+        try{
+            const response = await axios.post('http://127.0.0.1:5000/login', {
+                email: data.email,
+                password: data.password
+            });
+
+            console.log('Login Success:', response.data.message);
+            navigate('/user-dashboard');
+
+        } catch (err) {
+            if (err.response && err.response.data){
+                setError(err.response.data.error);
+            }
+            else {
+                setError('an error yo');
+            }
+        }
+
+
+        
+       
     };
 
     return (
         <form onSubmit={handleSubmit}>
             <h1>Please Login to Continue!</h1>
+            {error && <p>{error}</p>}
             <div>
             <label htmlFor="email" style={{display: "block"}}>Email</label>
             <input

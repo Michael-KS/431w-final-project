@@ -4,6 +4,7 @@ import './App.css';
 
 import AdminLandingPage from './pages/AdminLandingPage';
 import UserLoginPage from './pages/UserLoginPage';
+import UserDashboard from './pages/UserDashboard'; 
 
 const HomePage = () => {
   return(
@@ -40,6 +41,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/admin-landing-page" element={<AdminLandingPage />} />
         <Route path="/user-login-page" element={<UserLoginPage />} />
+        <Route path="/user-dashboard" element={<UserDashboard />} />
       </Routes>
     </>
   );

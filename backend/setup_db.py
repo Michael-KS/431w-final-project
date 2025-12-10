@@ -1,13 +1,16 @@
 import mysql.connector
+import os
+from dotenv import load_dotenv
 from pathlib import Path
+
+load_dotenv()
 
 def run_schema():
     sql = Path('schema.sql').read_text(encoding ='utf-8')
     conn = mysql.connector.connect(
         host='localhost',
-        user='Mike',
-        password='mango',
-        database='outing_app'
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
     )
     cursor = conn.cursor()
     for statement in sql.split(';'):
