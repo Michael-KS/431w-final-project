@@ -1,5 +1,5 @@
-DROP DATABASE IF EXISTS outing_app;
-CREATE DATABASE outing_app;
+--DROP DATABASE IF EXISTS outing_app;
+CREATE DATABASE IF NOT EXISTS outing_app;
 USE outing_app;
 
 CREATE TABLE Profile(

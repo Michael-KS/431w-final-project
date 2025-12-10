@@ -35,10 +35,6 @@ def register_user():
 
 @app.route("/login", methods=["POST", "OPTIONS"]) # submitting sensitive info requires POST
 def login_user():
-    print("--- LOGIN ENDPOINT HIT ---")
-    print("Request Method:", request.method)
-    print("Request Headers:\n", request.headers)
-    print("--------------------------")
     if request.method == 'POST':
         data = request.get_json()
         email = data.get("email")
@@ -375,6 +371,23 @@ def get_activities_by_category_route():
         return jsonify(result), 200
     else:
         return jsonify(result), 500
+
+@app.route("/get_events_by_host", methods=["GET", "OPTIONS"])
+def get_events_by_host_route():
+    if request.method == 'GET':
+        host_email = request.args.get("host_email")
+
+        if not host_email:
+            return jsonify({"status": "error", "message": "Host email is required"}), 400
+
+        result = get_events_by_host(host_email)
+
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+
+    return '', 204
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -32,3 +32,25 @@ def delete_review(rev_id):
     finally:
         cur.close()
         conn.close()
+
+def get_reviews_by_event(e_id):
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM Review WHERE E_id = %s", (e_id,))
+        reviews = cur.fetchall()
+        review_list = []
+        for review in reviews:
+            review_dict = {
+                "rev_id": review[0],
+                "Author_email": review[1],
+                "star_level": review[2],
+                "E_id": review[3],
+            }
+            review_list.append(review_dict)
+        return {"status": "success", "reviews": review_list}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        cur.close()
+        conn.close()
