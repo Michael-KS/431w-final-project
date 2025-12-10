@@ -107,3 +107,23 @@ def delete_profile(email):
     finally:
         cur.close()
         conn.close()
+
+def get_profile(email):
+    """
+    Retrieves a user's profile by email.
+    """
+    conn = get_connection()
+    cur = conn.cursor(dictionary=True)
+    try:
+        cur.execute(
+            "SELECT * FROM Profile WHERE Email = %s",
+            (email,),
+        )
+        profile = cur.fetchone()
+        return profile
+    except Exception as e:
+        print(f"Error retrieving profile: {e}")
+        return None
+    finally:
+        cur.close()
+        conn.close()

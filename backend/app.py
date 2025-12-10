@@ -389,5 +389,22 @@ def get_events_by_host_route():
 
     return '', 204
 
+@app.route("/get_profile", methods=["GET", "OPTIONS"])
+def get_profile_route():
+    if request.method == 'GET':
+        email = request.args.get("email")
+
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
+
+        profile = get_profile(email)
+
+        if profile:
+            return jsonify({"status": "success", "profile": profile}), 200
+        else:
+            return jsonify({"status": "error", "message": "Profile not found"}), 404
+
+    return '', 204
+
 if __name__ == "__main__":
     app.run(debug=True)
