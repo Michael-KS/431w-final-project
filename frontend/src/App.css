@@ -5,6 +5,12 @@
   text-align: center;
 }
 
+body {
+  background-color: #a12f6e;
+  margin: 0;
+  min-height: 100vh;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
