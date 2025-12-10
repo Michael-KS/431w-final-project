@@ -36,12 +36,7 @@ function UserLoginPage() {
             navigate('/user-dashboard');
 
         } catch (err) {
-            if (err.response && err.response.data){
-                setError(err.response.data.error);
-            }
-            else {
-                setError('an error yo');
-            }
+            setError('login failed');
         }
 
 

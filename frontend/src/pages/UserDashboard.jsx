@@ -26,8 +26,8 @@ const ProfileTabContent = () =>{
         e.preventDefault();
         setError('');
         try{
-            const response = await axios.post('http://127.0.0.1:5000/update_profile', {
-                email: user.email,
+            const response = await axios.put('http://127.0.0.1:5000/update_profile', {
+                email: user.Email,
                 username: data.username,
                 password: data.password,
                 location: data.location,
@@ -37,12 +37,7 @@ const ProfileTabContent = () =>{
             console.log('Update Success:', response.data.message);
 
         } catch (err) {
-            if (err.response && err.response.data){
-                setError(err.response.data.error);
-            }
-            else {
-                setError('you inputed an invalid entry');
-            }
+            setError('you inputed an invalid entry');
         } 
     };
         return (
@@ -58,6 +53,7 @@ const ProfileTabContent = () =>{
                 value = {data.username}
                 onChange = {handleChange}
                 placeholder="username"
+                required
                 />
             <label htmlFor="password" style={{display:'block'}}>Password</label>
             <input 
@@ -67,6 +63,7 @@ const ProfileTabContent = () =>{
                 value={data.password}
                 onChange={handleChange}
                 placeholder="password"
+                required
                 />
             <label htmlFor="location" style={{display:'block'}}>Location</label>
             <input 
@@ -76,6 +73,7 @@ const ProfileTabContent = () =>{
                 value={data.location}
                 onChange={handleChange}
                 placeholder="location"
+                required
                 />
             <label htmlFor="gender" style={{display:'block'}}>Gender</label>
             <input 
@@ -85,8 +83,10 @@ const ProfileTabContent = () =>{
                 value={data.gender}
                 onChange={handleChange}
                 placeholder="gender"
+                required
                 />
                 </div>
+                    {error && <p>{error}</p>}
                 <button type='submit'>Submit</button>
         </form>
         );
@@ -94,18 +94,24 @@ const ProfileTabContent = () =>{
 
 const GetProfileTabContent = () => {
     const {user} = useAuth();
-    const [showInfo, setShowInfo] = useState(false);
+    const [profileData, setProfileData] = useState(null);
+    const [error, setError] = useState('');
 
     const handleClick = async () => {
+
+        console.log("Just before API call, user object is:", user);
+        setError('');
+        setProfileData(null);
+
         try {
-        const response = await axios.get(`http://127.0.0.1:5000/api/profile`, {
-            params: {
-              email: user.email 
-            }
+            const response = await axios.get(`http://127.0.0.1:5000/get_profile`, {   
+                params: {
+                email: user.Email 
+                }
           });
           
           if (response.data.status === 'success') {
-            setProfileData(response.data.profile); // Store the fetched profile in our state
+            setProfileData(response.data.profile); 
           }
    
         } catch (err) {
@@ -115,6 +121,21 @@ const GetProfileTabContent = () => {
             setError("An error occurred while fetching the profile.");
           }
     }
+    };
+    return (
+        <div>
+            <h4>Click the button!</h4>
+            <button onClick={handleClick}>View My Profile</button>
+            {profileData && (<div>
+                <h4>Profile Details:</h4>
+                <p><strong>Username:</strong> {profileData.Username}</p>
+                <p><strong>Password:</strong> {profileData.Password}</p>
+                <p><strong>Location:</strong> {profileData.Location}</p>
+                <p><strong>Gender:</strong> {profileData.Gender}</p>
+                </div>
+            )}
+        </div>
+    );
 };
 
 const ActivitiesTabContent = () =>(
