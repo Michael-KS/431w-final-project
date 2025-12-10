@@ -420,5 +420,22 @@ def get_all_activities_route():
 
     return '', 204
 
+@app.route("/get_reviews_by_event", methods=["GET", "OPTIONS"])
+def get_reviews_by_event_route():
+    if request.method == 'GET':
+        e_id = request.args.get("e_id")
+
+        if not e_id:
+            return jsonify({"status": "error", "message": "Event ID is required"}), 400
+
+        result = get_reviews_by_event(e_id)
+
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+
+    return '', 204
+
 if __name__ == "__main__":
     app.run(debug=True)
