@@ -79,7 +79,7 @@ def get_events_by_host(host_email):
         )
         events = cur.fetchall()
         event_list = [
-            {"e_id": row[0], "Date": row[1], "Status": row[2], "Title": row[3], "Location": row[4], "Host": row[5]}
+            {"e_id": row[0], "Date": row[1].isoformat(), "Status": row[2], "Title": row[3], "Location": row[4], "Host": row[5]}
             for row in events
         ]
         return {"status": "success", "events": event_list}

@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import axios from "axios";
 import './UserDashboard.css'
 import { useAuth } from "../context/AuthContext";
+import ActivitySelector from "../components/ActivitySelector";
+import EventSelector from "../components/EventSelector";
 
 const ProfileTabContent = () =>{
     const {user} = useAuth();
@@ -12,7 +14,7 @@ const ProfileTabContent = () =>{
         gender: '',
     });
     const [error, setError] = useState('');
-    
+    const [success, setSuccess] = useState('');
 
     const handleChange = (e) => {
         const {name, value } = e.target;
@@ -34,7 +36,7 @@ const ProfileTabContent = () =>{
                 gender: data.gender
             });
 
-            console.log('Update Success:', response.data.message);
+            setSuccess('Update Successful!');
 
         } catch (err) {
             setError('you inputed an invalid entry');
@@ -44,6 +46,7 @@ const ProfileTabContent = () =>{
             <form onSubmit={handleSubmit}>
             <h2>Update Your Profile?</h2>
             {error && <p>{error}</p>}
+            {success && <p>{success}</p>}
             <div>
             <label htmlFor="username" style={{display: "block"}}>Username</label>
             <input
@@ -99,7 +102,6 @@ const GetProfileTabContent = () => {
 
     const handleClick = async () => {
 
-        console.log("Just before API call, user object is:", user);
         setError('');
         setProfileData(null);
 
@@ -138,23 +140,263 @@ const GetProfileTabContent = () => {
     );
 };
 
-const ActivitiesTabContent = () =>(
-    <div>
-        <h3>Activities</h3>
-    </div>
-)
+const ViewEventsTabContent = () =>{
+    const {user} = useAuth();
+    const [eventData, seteventData] = useState(null);
+    const [error, setError] = useState('');
 
-const EventTabContent = () => (
-    <div>
-        <h3>Events</h3>
-    </div>
-)
+    const handleClick = async () => {
 
-const ReviewTabContent = () => (
-    <div>
-        <h3>Reviews</h3>
-    </div>
-)
+        setError('');
+        seteventData(null);
+
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/get_events_by_host`, {   
+                params: {
+                host_email: user.Email 
+                }
+          });
+          
+          if (response.data.status === 'success') {
+            seteventData(response.data.events); 
+          }
+   
+        } catch (err) {
+          if (err.response && err.response.data) {
+            setError(err.response.data.message);
+          } else {
+            setError("An error occurred while fetching the events.");
+          }
+    }
+    };
+    return (
+        <div>
+            <h4>Click the button!</h4>
+            <button onClick={handleClick}>View Events Hosted By Me</button>
+            {eventData && (
+                eventData.map((event,index) => (
+                    <div>
+                    <p><strong>----Event ID:</strong> {event.e_id}<strong>----</strong></p>   
+                    <p><strong>Date:</strong> {event.Date}</p>
+                    <p><strong>Status:</strong> {event.Status}</p>
+                    <p><strong>Activity:</strong> {event.Title}</p>
+                    <p><strong>Location:</strong> {event.Location}</p>  
+                    </div>
+                ))
+            )}
+            
+
+        </div>
+    );
+}
+
+const EventTabContent = () => {
+    const {user} = useAuth();
+    const [data, setData] = useState({
+        date: '',
+        status: '',
+        activity: ''
+    });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+
+    const handleChange = (e) => {
+        const {name, value } = e.target;
+        console.log(`Input changed! Name: "${name}", Captured Value: "${value}", Type of Value: ${typeof value}`);
+        setData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try{
+            const response = await axios.post('http://127.0.0.1:5000/add_event', {
+                host_email: user.Email,
+                date: data.date,
+                status: data.status,
+                act_id: data.activity
+            });
+
+            console.log('Update Success:', response.data.message);
+            setSuccess("Event Added!");
+
+        } catch (err) {
+            setError('you inputed an invalid entry');
+        }   
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+        {error && <p>{error}</p>}
+        {success && <p>{success}</p>}
+        <div>
+            <h3>Create an Event</h3>
+            <div>
+                <label htmlFor="date" style={{display: "block"}}>Date</label>
+                <input
+                    type = 'text'
+                    id='date'
+                    name='date'
+                    value = {data.date}
+                    onChange = {handleChange}
+                    placeholder="date"
+                    required
+                    />
+                <label htmlFor="status" style={{display: "block"}}>Status</label>
+                <input
+                    type = 'text'
+                    id='status'
+                    name='status'
+                    value = {data.status}
+                    onChange = {handleChange}
+                    placeholder="status"
+                    required
+                    />
+                <h4>Choose Activity:</h4>
+                <label htmlFor="activity-select">Activity</label>
+                <ActivitySelector
+                    value={data.activity}
+                    onChange={handleChange}/>
+            </div>
+
+        </div>
+
+        <button type="submit">Create Event</button>
+        </form>
+    );
+};
+
+const ReviewTabContent = () => {
+    const {user} = useAuth();
+    const [data, setData] = useState({
+        star_level: '',
+        description: '',
+        event: ''
+    });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+
+    const handleChange = (e) => {
+        const {name, value } = e.target;
+        setData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try{
+            const response = await axios.post('http://127.0.0.1:5000/add_review', {
+                author_email: user.Email,
+                star_level: data.star_level,
+                description: data.description,
+                e_id: data.event
+            });
+
+            console.log('Update Success:', response.data.message);
+            setSuccess("Review Added!");
+
+        } catch (err) {
+            setError('you inputed an invalid entry');
+        }   
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+        {error && <p>{error}</p>}
+        {success && <p>{success}</p>}
+        <div>
+            <h3>Create a Review</h3>
+            <div>
+                <label htmlFor="star_level" style={{display: "block"}}>star_level</label>
+                <input
+                    type = 'text'
+                    id='star_level'
+                    name='star_level'
+                    value = {data.star_level}
+                    onChange = {handleChange}
+                    placeholder="star_level"
+                    required
+                    />
+                <label htmlFor="description" style={{display: "block"}}>description</label>
+                <input
+                    type = 'text'
+                    id='description'
+                    name='description'
+                    value = {data.description}
+                    onChange = {handleChange}
+                    placeholder="description"
+                    required
+                    />
+                <h4>Choose Event:</h4>
+                <label htmlFor="event-select">Event</label>
+                <EventSelector
+                    value={data.event}
+                    onChange={handleChange}/>
+            </div>
+
+        </div>
+
+        <button type="submit">Create Review</button>
+        </form>
+    );
+}
+
+
+const ViewReviewsTabContent = () => {
+   const {user} = useAuth();
+    const [eventData, seteventData] = useState(null);
+    const [error, setError] = useState('');
+
+    const handleClick = async () => {
+
+        setError('');
+        seteventData(null);
+
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/get_events_by_host`, {   
+                params: {
+                host_email: user.Email 
+                }
+          });
+          
+          if (response.data.status === 'success') {
+            seteventData(response.data.events); 
+          }
+   
+        } catch (err) {
+          if (err.response && err.response.data) {
+            setError(err.response.data.message);
+          } else {
+            setError("An error occurred while fetching the events.");
+          }
+    }
+    };
+    return (
+        <div>
+            <h4>Click the button!</h4>
+            <button onClick={handleClick}>View Events Hosted By Me</button>
+            {eventData && (
+                eventData.map((event,index) => (
+                    <div>
+                    <p><strong>----Event ID:</strong> {event.e_id}<strong>----</strong></p>   
+                    <p><strong>Date:</strong> {event.Date}</p>
+                    <p><strong>Status:</strong> {event.Status}</p>
+                    <p><strong>Activity:</strong> {event.Title}</p>
+                    <p><strong>Location:</strong> {event.Location}</p>  
+                    </div>
+                ))
+            )}
+            
+
+        </div>
+    );
+}
 
 const TopTenTabContent = () => (
     <div>
@@ -166,8 +408,8 @@ function UserDashboard() {
     const [activeTab, setActiveTab] = useState('profile')
 
     const renderTabContent = () => {
-        if(activeTab === 'activities'){
-            return <ActivitiesTabContent/>;
+        if(activeTab === 'viewevents'){
+            return <ViewEventsTabContent/>;
         } else if(activeTab === 'events'){
             return <EventTabContent/>;
         } else if(activeTab === 'reviews'){
@@ -176,6 +418,8 @@ function UserDashboard() {
             return <TopTenTabContent/>;
         } else if(activeTab === 'getprofile'){
             return <GetProfileTabContent/>;
+        } else if(activeTab === 'viewreviews'){
+            return <ViewReviewsTabContent/>;
         }
         return <ProfileTabContent/>;
 
@@ -195,17 +439,21 @@ function UserDashboard() {
                 onClick={() => setActiveTab('getprofile')}
                 >View Profile</button>
                 <button
-                className={activeTab === 'activities' ? 'active' : ''}
-                onClick={() => setActiveTab('activities')}
-                >Activities</button>
-                <button
                 className={activeTab === 'events' ? 'active' : ''}
                 onClick={() => setActiveTab('events')}
-                >Events</button>
+                >Create Event</button>
+                <button
+                className={activeTab === 'viewevents' ? 'active' : ''}
+                onClick={() => setActiveTab('viewevents')}
+                >View Events</button>
                 <button
                 className={activeTab === 'reviews' ? 'active' : ''}
                 onClick={() => setActiveTab('reviews')}
                 >Reviews</button>
+                <button
+                className={activeTab === 'viewreviews' ? 'active' : ''}
+                onClick={() => setActiveTab('viewreviews')}
+                >View Reviews</button>
                 <button
                 className={activeTab === 'top' ? 'active' : ''}
                 onClick={() => setActiveTab('top')}
