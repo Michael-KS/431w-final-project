@@ -8,6 +8,8 @@ from location_queries import *
 from activity_queries import *
 from event_queries import *
 from review_queries import *
+import re
+
 
 
 app = Flask(__name__)
@@ -74,21 +76,21 @@ def update_user_profile():
 
 
 
-@app.route("/delete_profile", methods=["DELETE"])
+@app.route("/delete_profile", methods=["DELETE", "OPTIONS"])
 def delete_user_profile():
-    data = request.get_json()
-    email = data.get("email")
+    if request.method == 'OPTIONS':
+        email = request.args.get("email")
 
-    if not email:
-        return jsonify({"status": "error", "message": "Email is required"}), 400
+        if not email:
+            return jsonify({"status": "error", "message": "Email is required"}), 400
 
-    result = delete_profile(email)
+        result = delete_profile(email)
 
-    if result["status"] == "success":
-        return jsonify(result), 200
-    else:
-        return jsonify(result), 500
-    
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+    return '', 204
 @app.route("/add_category", methods=["POST"])
 def add_new_category():
     data = request.get_json()
@@ -329,22 +331,25 @@ def delete_participant_route():
     else:
         return jsonify(result), 500
 
-@app.route("/add_review", methods=["POST"])
+@app.route("/add_review", methods=["POST", "OPTIONS"])
 def add_review_route():
-    data = request.get_json()
-    author_email = data.get("author_email")
-    star_level = data.get("star_level")
-    e_id = data.get("e_id")
+    if request.method == "POST":
+        data = request.get_json()
+        author_email = data.get("author_email")
+        star_level = data.get("star_level")
+        e_id = data.get("e_id")
+        description = data.get("description")
 
-    if not all([author_email, star_level, e_id]):
-        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+        if not all([author_email, star_level, e_id, description]):
+            return jsonify({"status": "error", "message": "Missing required fields"}), 400
 
-    result = add_review(author_email, star_level, e_id)
-    if result["status"] == "success":
-        return jsonify(result), 201
-    else:
-        return jsonify(result), 500
-    
+        result = add_review(author_email, star_level, e_id, description)
+        if result["status"] == "success":
+            return jsonify(result), 201
+        else:
+            return jsonify(result), 500
+    return '', 204
+
 @app.route("/delete_review", methods=["DELETE"])
 def delete_review_route():
     data = request.get_json()
@@ -429,6 +434,18 @@ def get_reviews_by_event_route():
             return jsonify({"status": "error", "message": "Event ID is required"}), 400
 
         result = get_reviews_by_event(e_id)
+
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 500
+
+    return '', 204
+
+@app.route("/get_top_ten", methods = ["GET", "OPTIONS"])
+def get_top_ten_route():
+    if request.method == 'GET':
+        result = get_top_ten()
 
         if result["status"] == "success":
             return jsonify(result), 200

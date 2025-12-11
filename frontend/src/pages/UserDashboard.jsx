@@ -349,7 +349,72 @@ const ReviewTabContent = () => {
 
 
 const ViewReviewsTabContent = () => {
-   const {user} = useAuth();
+    const [data, setData] = useState({
+        event: ''
+    });
+    const [reviewData, setReviewData] = useState(null);
+
+    const [error, setError] = useState('');
+
+    const handleChange = (e) => {
+        const {name, value } = e.target;
+        setData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    const handleClick = async () => {
+
+        setError('');
+        setReviewData(null);
+
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/get_reviews_by_event`, {   
+                params: {
+                e_id: data.event
+                }
+          });
+          
+          if (response.data.status === 'success') {
+            setReviewData(response.data.reviews); 
+          }
+   
+        } catch (err) {
+          if (err.response && err.response.data) {
+            setError(err.response.data.message);
+          } else {
+            setError("An error occurred");
+          }
+    }
+    };
+
+    return (
+        <div>
+            <h4>Choose Event:</h4>
+                <label htmlFor="event-select">Event</label>
+                <EventSelector
+                    value={data.event}
+                    onChange={handleChange}/>
+                <p></p>
+            <button onClick={handleClick}>View Reviews</button>
+            {error && <p>{error}</p>}
+            {reviewData && (
+                reviewData.map((reviewData,index) => (
+                    <div>
+                    <p><strong>----Review ID:</strong> {reviewData.rev_id}<strong>----</strong></p>   
+                    <p><strong>Author Email:</strong> {reviewData.Author_email}</p>
+                    <p><strong>Star Level:</strong> {reviewData.star_level}</p>
+                    <p><strong>Description:</strong> {reviewData.Description}</p>  
+                    </div>
+                ))
+            )}
+
+        </div>
+    );
+}
+
+const TopTenTabContent = () => {
     const [eventData, seteventData] = useState(null);
     const [error, setError] = useState('');
 
@@ -359,36 +424,36 @@ const ViewReviewsTabContent = () => {
         seteventData(null);
 
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/get_events_by_host`, {   
-                params: {
-                host_email: user.Email 
-                }
+            const response = await axios.get(`http://127.0.0.1:5000/get_top_ten`, {   
           });
           
           if (response.data.status === 'success') {
-            seteventData(response.data.events); 
+            seteventData(response.data.outings); 
           }
    
         } catch (err) {
           if (err.response && err.response.data) {
             setError(err.response.data.message);
           } else {
-            setError("An error occurred while fetching the events.");
+            setError("An error occurred while fetching the top ten.");
           }
     }
     };
     return (
         <div>
             <h4>Click the button!</h4>
-            <button onClick={handleClick}>View Events Hosted By Me</button>
+            <button onClick={handleClick}>View Top 10</button>
             {eventData && (
                 eventData.map((event,index) => (
                     <div>
-                    <p><strong>----Event ID:</strong> {event.e_id}<strong>----</strong></p>   
-                    <p><strong>Date:</strong> {event.Date}</p>
-                    <p><strong>Status:</strong> {event.Status}</p>
-                    <p><strong>Activity:</strong> {event.Title}</p>
-                    <p><strong>Location:</strong> {event.Location}</p>  
+                    <p><strong>----Act ID:</strong> {event.act_id}<strong>----</strong></p>   
+                    <p><strong>Title:</strong> {event.title}</p>
+                    <p><strong>Price:</strong> {event.price}</p>
+                    <p><strong>Duration:</strong> {event.duration}</p>
+                    <p><strong>Location:</strong> {event.location_name}</p>  
+                    <p><strong>Event Count:</strong> {event.event_count}</p>  
+                    <p><strong>Avg Rating:</strong> {event.avg_rating}</p>  
+                    <p><strong>Review Count:</strong> {event.review_count}</p>  
                     </div>
                 ))
             )}
@@ -397,12 +462,6 @@ const ViewReviewsTabContent = () => {
         </div>
     );
 }
-
-const TopTenTabContent = () => (
-    <div>
-        <h3>Top10</h3>
-    </div>
-)
 
 function UserDashboard() {
     const [activeTab, setActiveTab] = useState('profile')
