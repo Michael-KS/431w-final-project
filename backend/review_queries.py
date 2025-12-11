@@ -75,7 +75,7 @@ def get_top_ten():
                 "review_count": outing[7],
             }
             outing_list.append(outing_dict)
-            return{"status": "success", "outings": outing_list}
+        return{"status": "success", "outings": outing_list}
     except Exception as e:
         return{"status": "error", "message": str(e)}
     finally:

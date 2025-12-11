@@ -10,7 +10,11 @@ from event_queries import *
 from review_queries import *
 import re
 
-
+def is_valid_email(email):
+    regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if re.match(regex, email):
+        return True
+    return False
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}},
@@ -28,6 +32,9 @@ def register_user():
 
     if not all([email, username, password, location, gender]):
         return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    if not is_valid_email(email):
+        return jsonify({"status": "error", "message": "Invalid email format provided."}), 400
 
     result = create_profile(email, username, password, location, gender)
     if result["status"] == "success":
@@ -65,6 +72,7 @@ def update_user_profile():
         gender = data.get("gender")
         if not email:
             return jsonify({"status": "error", "message": "Email is required"}), 400
+
         
         result = update_profile(email, username, password, location, gender)
 
@@ -78,11 +86,14 @@ def update_user_profile():
 
 @app.route("/delete_profile", methods=["DELETE", "OPTIONS"])
 def delete_user_profile():
-    if request.method == 'OPTIONS':
+    if request.method == 'DELETE':
         email = request.args.get("email")
 
         if not email:
             return jsonify({"status": "error", "message": "Email is required"}), 400
+
+        if not is_valid_email(email):
+            return jsonify({"status": "error", "message": "Invalid email format provided."}), 400
 
         result = delete_profile(email)
 

@@ -1,5 +1,5 @@
---DROP DATABASE IF EXISTS outing_app;
-CREATE DATABASE IF NOT EXISTS outing_app;
+DROP DATABASE IF EXISTS outing_app;
+CREATE DATABASE outing_app;
 USE outing_app;
 
 CREATE TABLE Profile(
@@ -52,8 +52,8 @@ Duration DECIMAL(4,2),
 Price DECIMAL(5,2),
 Cat_id INTEGER,
 PRIMARY KEY(act_id),
-FOREIGN KEY(loc_id) REFERENCES Location(loc_id),
-FOREIGN KEY(cat_id) REFERENCES Category(cat_id)
+FOREIGN KEY(loc_id) REFERENCES Location(loc_id) ON DELETE CASCADE,
+FOREIGN KEY(cat_id) REFERENCES Category(cat_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Event(
@@ -63,7 +63,7 @@ Status CHAR(1), -- stuff like 'C' for complete or 'P' for planned
 Act_id INTEGER NOT NULL,
 Host_email VARCHAR(50) NOT NULL,
 PRIMARY KEY(e_id),
-FOREIGN KEY(act_id) REFERENCES Activity(act_id),
+FOREIGN KEY(act_id) REFERENCES Activity(act_id) ON DELETE CASCADE,
 FOREIGN KEY(host_email) REFERENCES Profile(email) ON DELETE CASCADE
 );
 
@@ -72,7 +72,7 @@ Email VARCHAR(50) NOT NULL,
 E_id INTEGER NOT NULL,
 PRIMARY KEY(email, e_id),
 FOREIGN KEY(email) REFERENCES Profile(email) ON DELETE CASCADE,
-FOREIGN KEY(e_id) REFERENCES Event(e_id)
+FOREIGN KEY(e_id) REFERENCES Event(e_id) ON DELETE CASCADE
 );
 
 
@@ -84,7 +84,7 @@ E_id INTEGER NOT NULL,
 Description VARCHAR(200),
 PRIMARY KEY(rev_id),
 FOREIGN KEY(author_email) REFERENCES Profile(email) ON DELETE CASCADE,
-FOREIGN KEY(e_id) REFERENCES Event(e_id)
+FOREIGN KEY(e_id) REFERENCES Event(e_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_user_email_password ON Profile(email, password); -- for func 1

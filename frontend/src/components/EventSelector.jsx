@@ -44,7 +44,7 @@ function EventSelector({ value, onChange }) {
             <option value="" disabled>--Please Choose an Event--</option>
             {events.map((event) => (
                 <option key={event.e_id} value={event.e_id}>
-                    {event.e_id}
+                    {event.Date}
                 </option>
             ))}
         </select>

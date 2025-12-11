@@ -48,8 +48,8 @@ function ActivitySelector({ value, onChange }) {
                 // This is the most critical line.
                 // The 'value' is explicitly set to the numeric act_id.
                 // The text displayed to the user is the Title.
-                <option key={activity.act_id} value={activity.act_id}>
-                    {activity.Act_id}
+                <option key={activity.Act_id} value={activity.Act_id}>
+                    {activity.Title}
                 </option>
             ))}
         </select>
